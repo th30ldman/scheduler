@@ -17,9 +17,6 @@ int randsim::getNext() {
   // use bottom half as the value
   int val=(compound&0x7FFF)%scale;
 
-  std::cout << std::hex << compound << std::endl;
-  std::cout << "prob " << pb << " val " << val << std::endl;
-
-  return pb>intRate?val:0;
+  return pb<intRate?val:0;
 
 }
