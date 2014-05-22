@@ -10,6 +10,9 @@ public:
   int getNext();
 
 private:
+
+  static Boolean once;
+
   float arrivalRate;
   int intRate;
   int scale;
