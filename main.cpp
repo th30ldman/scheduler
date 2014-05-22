@@ -31,15 +31,21 @@ int main (int argc, char *argv[]){
     if (taskIterations > 0){ 
 
       int newTask=task.getNext();
+      if (newTask>0){
 
-      taskList.push_back(newTask);
-      totalTaskUnits+=newTask;
+        taskList.push_back(newTask);
+        totalTaskUnits+=newTask;
+
+      }
 
     }
 
     // Generate resources
-    resList.push_back(resource.getNext());
-    totalResources++;
+    int newResource=resource.getNext();
+    if (newResource>0){
+      resList.push_back(newResource);
+      totalResources++;
+    }
 
     // schedule!
 
