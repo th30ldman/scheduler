@@ -4,9 +4,10 @@
 #include "randsim.h"
 
 randsim::randsim(float rate, int scale): arrivalRate(rate), scale(scale) {
+
   srandom(time(NULL));
   intRate=rate*0x7FFF; // scale to a rate we can compare to directly.
-  std::cout << "rate " << intRate << std::endl;
+
 }
 
 int randsim::getNext() {
