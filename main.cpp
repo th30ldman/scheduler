@@ -11,21 +11,23 @@ int main (int argc, char *argv[]){
   // rate of arrival of tasks and resources is independent.
   // scale in case of tasks refers to size of tasks.
   // scale in case of resources, refers to the max size of the pool of resources.
-  int maxTaskSize=20;
-  float taskRate=0.3;
-  int maxResources=60;
-  float resourceRate=0.3;
+  uint32_t maxTaskSize=10;
+  float taskRate=0.5;
+  uint32_t maxResources=10;
+  float resourceRate=0.2;
   int taskIterations=100;
-  list<int> taskList; // do.. while drawback.
+  int maxTaskQueueDepth=10;
+  int statsInterval=10;
+  bool verbose=1;
+
+  list<int> taskList;
+  list<int> resList;
+  int totalTaskUnits=0; 
+  randsim task(taskRate,maxTaskSize,verbose);
+  randsim resource(resourceRate,maxResources,verbose);
+  sched scheduler(maxTaskQueueDepth, verbose); 
 
   do {
-
-    randsim task(taskRate,maxTaskSize);
-    randsim resource(resourceRate,maxResources); // srand gets called twice :(
-    sched scheduler; 
-    list<int> resList;
-    int totalResources=0;
-    int totalTaskUnits=0; 
 
     // Only generate tasks if we have iterations left.
     if (taskIterations > 0){ 
@@ -41,18 +43,38 @@ int main (int argc, char *argv[]){
     }
 
     // Generate resources
-    int newResource=resource.getNext();
-    if (newResource>0){
-      resList.push_back(newResource);
-      totalResources++;
+    // Since resources are 1 unit each, in order to scale correctly wrt tasks
+    // we need to generate at least the same amount of resources as the possible size
+    // of tasks per cycle.
+    // As per the assignment we don't have to worry about duplicates, since a particular
+    // resource may have multiple cores. 
+    // if uniqueness was required than this should be a set instead of a list, and 
+    // maxResources would have to be sufficient. Duplicates generated would simply be
+    // dropped. That would affect the nature of the random distribution. (Given machinations
+    // in randsim.cpp it is unlikely uniform anyway.)
+    for (int i=0; i<maxTaskSize; i++){
+
+      int newResource=resource.getNext();
+
+      if (newResource>0){
+
+        resList.push_back(newResource);
+        
+      }
+
     }
 
     // schedule!
 
-    scheduler.schedule(taskList,resList, totalTaskUnits, totalResources);
+    scheduler.schedule(taskList,resList, totalTaskUnits);
+    
+    if (taskIterations % statsInterval == 0)
+      scheduler.dumpStats();
 
+  } while (taskIterations-- > 0 || !taskList.empty());
 
-  } while (taskIterations-- || !taskList.empty());
-
+  scheduler.dumpStats();
+  
+  return 0;
   
 }

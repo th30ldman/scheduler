@@ -5,17 +5,18 @@ class randsim {
 
 public:
   // arrival rate controls if geftnext will return a value>0
-  randsim(float rate, int scale);
+  randsim(float rate, uint32_t scale, bool verbose);
   ~randsim() {}
   int getNext();
 
 private:
 
-  static Boolean once;
+  static bool once;
 
   float arrivalRate;
-  int intRate;
-  int scale;
+  uint32_t intRate;
+  uint32_t scale;
+  bool verbose;
 
 };
 
