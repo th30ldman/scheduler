@@ -29,14 +29,10 @@ int sched::schedule(std::list<int>& tasks, std::list<int>& resources, int& total
   if (verbose)
     cout << "Tasks: " << tasks.size() << " Resources: " << resources.size() << endl; 
 
-  // update stats
-  schedulerIterations++;
-  maxResourceQueueDepth = resources.size() > maxResourceQueueDepth ? resources.size() : maxResourceQueueDepth;
-  maxTaskQueueDepth = tasks.size() > maxTaskQueueDepth ? tasks.size() : maxTaskQueueDepth;
-    
 
-  // This is greedy in that it eats as many tasks as it can.
-  for (taskIt=tasks.begin(); taskIt != tasks.end() && resources.size() > 0; ++taskIt){
+  // 1. Only recurse upto maxBackLog
+  // 2. If resource queue is empty, bail.
+  for (taskIt=tasks.begin(); taskIt != tasks.end() && resources.size() > 0 && depthOfQueue < maxBacklog; ++taskIt){
     
     if (*taskIt <= resources.size()){
 
@@ -58,18 +54,7 @@ int sched::schedule(std::list<int>& tasks, std::list<int>& resources, int& total
 
     if (tasksConsumed==0) {
       // This only ever triggers when it can not consume the first task.
-
-      if (depthOfQueue > maxBacklog){
-        // This only ever triggers when it can not consume the first task.      
-        // if we reach this point, we're piling up the tasks at the head of the queue, and taking the
-        // small tasks of the back of the queue, so skip out, and let the resource queue replenish.
-        // This is a pretty good indication, there is more to do than resources available.
-        // update stats.
-        maxDepthReached++;
-        return 0;
-
-      }
-
+      
       depthOfQueue++;
       continue;
       
@@ -77,18 +62,53 @@ int sched::schedule(std::list<int>& tasks, std::list<int>& resources, int& total
 
   }
 
-  return tasksConsumed;
+  tasksPerCycle+=tasksConsumed;
+
+  // update stats
+
+  // Note that either of these can be pulled to get the number of iterations of the scheduler.
+  resourceQueueDepth+=resources.size();
+  taskQueueDepth+=tasks.size();
+    
+  if (depthOfQueue < maxBacklog){
+
+    return tasksConsumed;
+
+  } else {
+
+    // if we reach this point, we're piling up the tasks at the head of the queue, and taking the
+    // small tasks of the back of the queue, so skip out, and let the resource queue replenish.
+    // This is a pretty good indication, there is more to do than resources available.
+
+    maxDepthReached++;
+    return 0;
+
+  }
 
 }
 
-
 void sched::dumpStats() {
 
-  cout << "Scheduler stats" << endl;
-  cout << "schedulerIterations " << schedulerIterations << endl;
-  cout << "maxTaskQueueDepth " << maxTaskQueueDepth << endl;
-  cout << "maxResourceQueueDepth " << maxResourceQueueDepth << endl;
-  cout << "maxDepthReached " << maxDepthReached << endl << endl;
+  cout << "Scheduler stats:" << endl << endl;;
+  cout << "schedulerIterations " << getIterations() << endl << endl;
+  cout << "Task queue:" << endl;
+  cout << "Min: " << taskQueueDepth.min() << endl;
+  cout << "Max: " << taskQueueDepth.max() << endl;
+  cout << "Mean: " << taskQueueDepth.mean() << endl;
+  cout << "Std: " << taskQueueDepth.stdDeviation() << endl;
+  cout << endl;
+  cout << "Tasks per cycle:" << endl;
+  cout << "Min: " << tasksPerCycle.min() << endl;
+  cout << "Max: " << tasksPerCycle.max() << endl;
+  cout << "Mean: " << tasksPerCycle.mean() << endl;
+  cout << "Std: " << tasksPerCycle.stdDeviation() << endl;
+  cout << endl;
+  cout << "Resource queue" << endl;
+  cout << "Min: " << resourceQueueDepth.min() << endl;
+  cout << "Max: " << resourceQueueDepth.max() << endl;
+  cout << "Mean: " << resourceQueueDepth.mean() << endl;
+  cout << "Std: " << resourceQueueDepth.stdDeviation() << endl << endl;
+  cout << "Maximum backlog reached: " << maxDepthReached << endl;
   
 
 }

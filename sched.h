@@ -2,15 +2,13 @@
 #define SCHED_H
 
 #include <list>
+#include "runstat.h"
 
 class sched {
 
 public:
 sched(int maxBacklog, bool verbose):maxBacklog(maxBacklog),verbose(verbose){
-    maxTaskQueueDepth=0;
-    maxResourceQueueDepth=0;
     maxDepthReached=0;
-    schedulerIterations=0;
   }
 
   ~sched() {}
@@ -22,13 +20,21 @@ sched(int maxBacklog, bool verbose):maxBacklog(maxBacklog),verbose(verbose){
   
   void dumpStats();
 
+  uint64_t getIterations(){
+
+    return (resourceQueueDepth.noSamples());
+            
+  }
+  
 private:
   int maxBacklog;
   bool verbose;
-  int maxTaskQueueDepth;
-  int maxResourceQueueDepth;
+  // stat stuff
+  
+  runstat taskQueueDepth;
+  runstat resourceQueueDepth;
+  runstat tasksPerCycle;
   int maxDepthReached;
-  int schedulerIterations;
    
 };
 

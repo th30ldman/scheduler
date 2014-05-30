@@ -9,8 +9,8 @@ clean:
 	rm -f ${OBJS} ${EXEC}
 
 ${EXEC}: ${OBJS}
-	g++ -o $@ $^
+	g++ -ggdb -o $@ $^
 
 # need the c++11 for convenience wrt the use of random
 %.o: %.cpp
-	g++ -std=c++11 -c $<
+	g++ -ggdb -std=c++11 -c $<

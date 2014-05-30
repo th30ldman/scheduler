@@ -15,9 +15,8 @@ int main (int argc, char *argv[]){
   float taskRate=0.5;
   uint32_t maxResources=10;
   float resourceRate=0.25;
-  int taskIterations=20000;
+  int taskIterations=400000;
   int maxTaskQueueDepth=10;
-  int statsInterval=100;
   bool verbose=0;
 
   list<int> taskList;
@@ -68,15 +67,12 @@ int main (int argc, char *argv[]){
 
     scheduler.schedule(taskList,resList, totalTaskUnits);
     
-    if (taskIterations % statsInterval == 0)
-      scheduler.dumpStats();
-
-  } while (taskIterations-- > 0 || !taskList.empty());
-
-  cout << "Needed " << (~taskIterations) << " extra iterations to clean up task queue" << endl;
+  } while (--taskIterations > 0 || !taskList.empty());
 
   scheduler.dumpStats();
   
+  cout << "Needed " << (~taskIterations)+1 << " extra iterations to clean up task queue" << endl;
+
   return 0;
   
 }
